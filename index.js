@@ -39,6 +39,18 @@ io.on("connection", (socket) => {
       message,
     });
   });
+  socket.on("newOrder", ({ receiverId, order }) => {
+    const user = getUser(receiverId);
+    io.to(user?.socketId).emit("getOrder", {
+      order,
+    });
+  });
+  socket.on("updateOrder", ({ receiverId, order }) => {
+    const user = getUser(receiverId);
+    io.to(user?.socketId).emit("updateOrder", {
+      order,
+    });
+  });
   socket.on("disconnect", () => {
     removeUser(socket.id);
     io.emit("getUsers", users);
