@@ -22,6 +22,7 @@ const getUser = (userId) => {
 
 io.on("connection", (socket) => {
   console.log("user connected", socket.id);
+  io.emit("connected", socket.id);
 
   socket.on("join", (userId) => {
     addUser(userId, socket.id);
