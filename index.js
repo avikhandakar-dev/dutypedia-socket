@@ -89,13 +89,13 @@ io.on("connection", (socket) => {
   });
 
   //Call
-  socket.on("callUser", (receiverId, data) => {
+  socket.on("callUser", ({ receiverId, data }) => {
     const user = getUser(receiverId);
     user?.socketId.forEach((id) => {
       io.to(id).emit("incomingCall", data);
     });
   });
-  socket.on("answerCall", (userId, data) => {
+  socket.on("answerCall", ({ userId, data }) => {
     const user = getUser(userId);
     user?.socketId.forEach((id) => {
       io.to(id).emit("callAccepted", data);
@@ -113,7 +113,7 @@ io.on("connection", (socket) => {
       io.to(id).emit("userBusy");
     });
   });
-  socket.on("switchCam", (id, camera) => {
+  socket.on("switchCam", ({ id, camera }) => {
     io.to(id).emit("switchCamera", camera);
   });
 
