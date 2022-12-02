@@ -95,6 +95,12 @@ io.on("connection", (socket) => {
       io.to(id).emit("incomingCall", data);
     });
   });
+  socket.on("answerCall", (userId, data) => {
+    const user = getUser(userId);
+    user?.socketId.forEach((id) => {
+      io.to(id).emit("callAccepted", data);
+    });
+  });
   socket.on("endCall", (userId) => {
     const user = getUser(userId);
     user?.socketId.forEach((id) => {
