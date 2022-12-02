@@ -46,11 +46,14 @@ const addUser = (userId, socketId) => {
 io.on("connection", (socket) => {
   console.log("user connected", socket.id);
 
+  //Join
   socket.on("join", (userId) => {
     addUser(userId, socket.id);
     io.emit("getUsers", users);
     console.log("connect", users);
   });
+
+  //Notifications and message
   socket.on("notificationSend", (receiverId) => {
     const user = getUser(receiverId);
     user?.socketId.forEach((id) => {
@@ -66,6 +69,8 @@ io.on("connection", (socket) => {
       });
     });
   });
+
+  //Orders
   socket.on("newOrder", ({ receiverId, order }) => {
     const user = getUser(receiverId);
     user?.socketId.forEach((id) => {
@@ -82,9 +87,35 @@ io.on("connection", (socket) => {
       });
     });
   });
+
+  //Call
+  socket.on("callUser", (receiverId, data) => {
+    const user = getUser(receiverId);
+    user?.socketId.forEach((id) => {
+      io.to(id).emit("incomingCall", data);
+    });
+  });
+  socket.on("endCall", (userId) => {
+    const user = getUser(userId);
+    user?.socketId.forEach((id) => {
+      io.to(id).emit("callEnded");
+    });
+  });
+  socket.on("busy", (userId) => {
+    const user = getUser(userId);
+    user?.socketId.forEach((id) => {
+      io.to(id).emit("userBusy");
+    });
+  });
+  socket.on("switchCam", (id, camera) => {
+    io.to(id).emit("switchCamera", camera);
+  });
+
+  //Disconnect
   socket.on("disconnect", () => {
     removeUser(socket.id);
     io.emit("getUsers", users);
+    socket.broadcast.emit("callEnded");
     console.log("disconnect", users);
   });
 });
