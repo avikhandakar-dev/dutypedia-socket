@@ -92,13 +92,13 @@ io.on("connection", (socket) => {
   socket.on("initCall", (receiverId) => {
     const user = getUser(receiverId);
     user?.socketId.forEach((id) => {
-      io.to(id).emit("initCall");
+      io.to(id).emit("initCall", receiverId);
     });
   });
   socket.on("receiverIsReady", (receiverId) => {
     const user = getUser(receiverId);
     user?.socketId.forEach((id) => {
-      io.to(id).emit("receiverIsReady", data);
+      io.to(id).emit("receiverIsReady", receiverId);
     });
   });
   socket.on("callUser", ({ receiverId, data }) => {
