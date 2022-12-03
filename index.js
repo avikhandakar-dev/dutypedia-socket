@@ -90,12 +90,14 @@ io.on("connection", (socket) => {
 
   //Call
   socket.on("initCall", (receiverId) => {
+    console.log(receiverId, "init");
     const user = getUser(receiverId);
     user?.socketId.forEach((id) => {
       io.to(id).emit("initCall", receiverId);
     });
   });
   socket.on("receiverIsReady", (receiverId) => {
+    console.log(receiverId, "ready");
     const user = getUser(receiverId);
     user?.socketId.forEach((id) => {
       io.to(id).emit("receiverIsReady", receiverId);
