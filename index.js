@@ -89,11 +89,15 @@ io.on("connection", (socket) => {
   });
 
   //Call
-  socket.on("callUser", ({ receiverId, data }) => {
-    console.log(receiverId, "receiverId");
+  socket.on("initCall", (receiverId) => {
     const user = getUser(receiverId);
     user?.socketId.forEach((id) => {
-      console.log(id, "Ids");
+      io.to(id).emit("initCall");
+    });
+  });
+  socket.on("callUser", ({ receiverId, data }) => {
+    const user = getUser(receiverId);
+    user?.socketId.forEach((id) => {
       io.to(id).emit("incomingCall", data);
     });
   });
