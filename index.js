@@ -90,6 +90,7 @@ io.on("connection", (socket) => {
 
   //Call
   socket.on("callUser", ({ receiverId, data }) => {
+    console.log(data);
     const user = getUser(receiverId);
     user?.socketId.forEach((id) => {
       io.to(id).emit("incomingCall", data);
@@ -111,6 +112,12 @@ io.on("connection", (socket) => {
     const user = getUser(userId);
     user?.socketId.forEach((id) => {
       io.to(id).emit("userBusy");
+    });
+  });
+  socket.on("rejectCall", (userId) => {
+    const user = getUser(userId);
+    user?.socketId.forEach((id) => {
+      io.to(id).emit("callRejected");
     });
   });
   socket.on("switchCam", ({ id, camera }) => {
