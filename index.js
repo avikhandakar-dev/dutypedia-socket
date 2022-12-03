@@ -90,9 +90,10 @@ io.on("connection", (socket) => {
 
   //Call
   socket.on("callUser", ({ receiverId, data }) => {
-    console.log(data);
+    console.log(receiverId, "receiverId");
     const user = getUser(receiverId);
     user?.socketId.forEach((id) => {
+      console.log(id, "Ids");
       io.to(id).emit("incomingCall", data);
     });
   });
