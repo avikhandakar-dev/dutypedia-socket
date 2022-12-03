@@ -98,7 +98,7 @@ io.on("connection", (socket) => {
   socket.on("receiverIsReady", (receiverId) => {
     const user = getUser(receiverId);
     user?.socketId.forEach((id) => {
-      io.to(id).emit("receiverIsReady");
+      io.to(id).emit("receiverIsReady", data);
     });
   });
   socket.on("callUser", ({ receiverId, data }) => {
