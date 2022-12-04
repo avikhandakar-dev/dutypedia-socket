@@ -89,20 +89,6 @@ io.on("connection", (socket) => {
   });
 
   //Call
-  socket.on("initCall", (receiverId) => {
-    console.log(receiverId, "init");
-    const user = getUser(receiverId);
-    user?.socketId.forEach((id) => {
-      io.to(id).emit("initCall", receiverId);
-    });
-  });
-  socket.on("receiverIsReady", (receiverId) => {
-    console.log(receiverId, "ready");
-    const user = getUser(receiverId);
-    user?.socketId.forEach((id) => {
-      io.to(id).emit("receiverIsReady", receiverId);
-    });
-  });
   socket.on("callUser", ({ receiverId, data }) => {
     const user = getUser(receiverId);
     user?.socketId.forEach((id) => {
@@ -137,11 +123,52 @@ io.on("connection", (socket) => {
     io.to(id).emit("switchCamera", camera);
   });
 
+  //Test
+  const roomUsers = {};
+  const socketToRoom = {};
+
+  socket.on("join room", (roomID) => {
+    if (roomUsers[roomID]) {
+      const length = roomUsers[roomID].length;
+      if (length === 4) {
+        socket.emit("room full");
+        return;
+      }
+      roomUsers[roomID].push(socket.id);
+    } else {
+      roomUsers[roomID] = [socket.id];
+    }
+    socketToRoom[socket.id] = roomID;
+    const usersInThisRoom = roomUsers[roomID].filter((id) => id !== socket.id);
+
+    socket.emit("all users", usersInThisRoom);
+  });
+
+  socket.on("sending signal", (payload) => {
+    io.to(payload.userToSignal).emit("user joined", {
+      signal: payload.signal,
+      callerID: payload.callerID,
+    });
+  });
+
+  socket.on("returning signal", (payload) => {
+    io.to(payload.callerID).emit("receiving returned signal", {
+      signal: payload.signal,
+      id: socket.id,
+    });
+  });
+
   //Disconnect
   socket.on("disconnect", () => {
+    const roomID = socketToRoom[socket.id];
+    let room = roomUsers[roomID];
+    if (room) {
+      room = room.filter((id) => id !== socket.id);
+      roomUsers[roomID] = room;
+    }
+
     removeUser(socket.id);
     io.emit("getUsers", users);
-    socket.broadcast.emit("callEnded");
     console.log("disconnect", users);
   });
 });
