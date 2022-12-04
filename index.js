@@ -6,6 +6,8 @@ const io = require("socket.io")(8000, {
 
 //Socket.io
 let users = [];
+const roomUsers = {};
+const socketToRoom = {};
 
 const removeUser = (socketId) => {
   users.forEach((element, index) => {
@@ -124,8 +126,6 @@ io.on("connection", (socket) => {
   });
 
   //Test
-  const roomUsers = {};
-  const socketToRoom = {};
 
   socket.on("join room", (roomID) => {
     if (roomUsers[roomID]) {
