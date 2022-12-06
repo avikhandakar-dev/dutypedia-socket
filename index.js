@@ -6,8 +6,7 @@ const io = require("socket.io")(8000, {
 
 //Socket.io
 let users = [];
-const roomUsers = {};
-const socketToRoom = {};
+const rooms = {};
 
 const removeUser = (socketId) => {
   users.forEach((element, index) => {
@@ -128,45 +127,32 @@ io.on("connection", (socket) => {
   //Test
 
   socket.on("join room", (roomID) => {
-    if (roomUsers[roomID]) {
-      const length = roomUsers[roomID].length;
-      if (length === 4) {
-        socket.emit("room full");
-        return;
-      }
-      roomUsers[roomID].push(socket.id);
+    if (rooms[roomID]) {
+      rooms[roomID].push(socket.id);
     } else {
-      roomUsers[roomID] = [socket.id];
+      rooms[roomID] = [socket.id];
     }
-    socketToRoom[socket.id] = roomID;
-    const usersInThisRoom = roomUsers[roomID].filter((id) => id !== socket.id);
-
-    socket.emit("all users", usersInThisRoom);
+    const otherUser = rooms[roomID].find((id) => id !== socket.id);
+    if (otherUser) {
+      socket.emit("other user", otherUser);
+      socket.to(otherUser).emit("user joined", socket.id);
+    }
   });
 
-  socket.on("sending signal", (payload) => {
-    io.to(payload.userToSignal).emit("user joined", {
-      signal: payload.signal,
-      callerID: payload.callerID,
-    });
+  socket.on("offer", (payload) => {
+    io.to(payload.target).emit("offer", payload);
   });
 
-  socket.on("returning signal", (payload) => {
-    io.to(payload.callerID).emit("receiving returned signal", {
-      signal: payload.signal,
-      id: socket.id,
-    });
+  socket.on("answer", (payload) => {
+    io.to(payload.target).emit("answer", payload);
+  });
+
+  socket.on("ice-candidate", (incoming) => {
+    io.to(incoming.target).emit("ice-candidate", incoming.candidate);
   });
 
   //Disconnect
   socket.on("disconnect", () => {
-    const roomID = socketToRoom[socket.id];
-    let room = roomUsers[roomID];
-    if (room) {
-      room = room.filter((id) => id !== socket.id);
-      roomUsers[roomID] = room;
-    }
-
     removeUser(socket.id);
     io.emit("getUsers", users);
     console.log("disconnect", users);
