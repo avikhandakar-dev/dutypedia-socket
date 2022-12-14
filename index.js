@@ -103,21 +103,10 @@ io.on("connection", (socket) => {
       io.to(id).emit("callAccepted", data);
     });
   });
-  socket.on("endCall", ({ userId, myId }) => {
+  socket.on("endCall", (userId) => {
     const user = getUser(userId);
     user?.socketId.forEach((id) => {
       io.to(id).emit("callEnded");
-    });
-
-    //test
-    const myself = getUser(myId);
-    myself?.socketId.forEach((id) => {
-      const roomID = socketToRoom[id];
-      let room = roomUsers[roomID];
-      if (room) {
-        room = room.filter((rId) => rId !== id);
-        roomUsers[roomID] = room;
-      }
     });
   });
   socket.on("busy", (userId) => {
@@ -141,8 +130,8 @@ io.on("connection", (socket) => {
   socket.on("join room", (roomID) => {
     if (roomUsers[roomID]) {
       const length = roomUsers[roomID].length;
-      if (length === 4) {
-        socket.emit("room full");
+      if (length === 2) {
+        socket.emit("roomFull");
         return;
       }
       roomUsers[roomID].push(socket.id);
