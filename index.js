@@ -108,12 +108,8 @@ io.on("connection", (socket) => {
     user?.socketId.forEach((id) => {
       io.to(id).emit("callEnded");
       //Test
-      const roomID = socketToRoom[id];
-      let room = roomUsers[roomID];
-      if (room) {
-        room = room.filter((rId) => rId !== id);
-        roomUsers[roomID] = room;
-      }
+      socketToRoom = {};
+      roomUsers = {};
     });
   });
   socket.on("busy", (userId) => {
