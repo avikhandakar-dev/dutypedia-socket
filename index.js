@@ -103,13 +103,21 @@ io.on("connection", (socket) => {
       io.to(id).emit("callAccepted", data);
     });
   });
-  socket.on("endCall", (userId) => {
+  socket.on("endCall", ({ userId, myId }) => {
     const user = getUser(userId);
     user?.socketId.forEach((id) => {
       io.to(id).emit("callEnded");
-      //Test
-      socketToRoom = {};
-      roomUsers = {};
+    });
+
+    //test
+    const myself = getUser(myId);
+    myself?.socketId.forEach((id) => {
+      const roomID = socketToRoom[id];
+      let room = roomUsers[roomID];
+      if (room) {
+        room = room.filter((rId) => rId !== id);
+        roomUsers[roomID] = room;
+      }
     });
   });
   socket.on("busy", (userId) => {
