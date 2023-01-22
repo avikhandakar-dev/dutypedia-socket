@@ -125,7 +125,7 @@ io.on("connection", (socket) => {
     io.to(id).emit("switchCamera", camera);
   });
 
-  //Test
+  //Room
 
   socket.on("join room", (roomID) => {
     if (roomUsers[roomID]) {
@@ -155,6 +155,13 @@ io.on("connection", (socket) => {
     io.to(payload.callerID).emit("receiving returned signal", {
       signal: payload.signal,
       id: socket.id,
+    });
+  });
+
+  //Experimental
+  socket.on("sendData", (data) => {
+    socket.broadcast.emit("getData", {
+      data,
     });
   });
 
