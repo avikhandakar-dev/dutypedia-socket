@@ -46,13 +46,13 @@ const addUser = (userId, socketId) => {
 };
 
 io.on("connection", (socket) => {
-  console.log("user connected", socket.id);
+  console.log("user connected not registered", socket.id);
 
   //Join
   socket.on("join", (userId) => {
     addUser(userId, socket.id);
     io.emit("getUsers", users);
-    console.log("connect", users);
+    console.log("connect registered", userId);
   });
 
   //Notifications and message
@@ -178,6 +178,5 @@ io.on("connection", (socket) => {
 
     removeUser(socket.id);
     io.emit("getUsers", users);
-    console.log("disconnect", users);
   });
 });
